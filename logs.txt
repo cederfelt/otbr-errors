@@ -1,0 +1,1439 @@
++++ dirname /app/script/server
+++ cd /app/script/..
+++ HAVE_SYSTEMCTL=0
+++ have systemctl
+++ command -v systemctl
+++ HAVE_SERVICE=0
+++ have service
+++ command -v service
+++ HAVE_SERVICE=1
+++ [[ ! -n x ]]
+++ echo 'Current platform is ubuntu'
+Current platform is ubuntu
+++ with BORDER_ROUTING
+++ local value
++++ printenv BORDER_ROUTING
+++ value=1
+++ [[ -z 1 ]]
+++ [[ 1 == 1 ]]
+++ with DHCPV6_PD
+++ local value
++++ printenv DHCPV6_PD
+++ value=
+++ [[ -z '' ]]
+++ [[ -f examples/platforms/ubuntu/default ]]
+++ [[ '' == 1 ]]
+++ with BORDER_ROUTING
+++ local value
++++ printenv BORDER_ROUTING
+++ value=1
+++ [[ -z 1 ]]
+++ [[ 1 == 1 ]]
+++ with NETWORK_MANAGER
+++ local value
++++ printenv NETWORK_MANAGER
+++ value=
+++ [[ -z '' ]]
+++ [[ -f examples/platforms/ubuntu/default ]]
+++ [[ '' == 1 ]]
+++ STAGE_DIR=/app/stage
+++ BUILD_DIR=/app/build
+++ [[ -d /app/stage ]]
+++ [[ -d /app/build ]]
+++ export PATH=/app/stage/usr/bin:/app/stage/usr/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+++ PATH=/app/stage/usr/bin:/app/stage/usr/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
++++ basename /app/script/server
+++ TASKNAME=server
+++ BEFORE_HOOK=examples/platforms/ubuntu/before_server
+++ AFTER_HOOK=examples/platforms/ubuntu/after_server
+++ [[ ! -f examples/platforms/ubuntu/before_server ]]
+++ BEFORE_HOOK=/dev/null
+++ [[ ! -f examples/platforms/ubuntu/after_server ]]
+++ AFTER_HOOK=/dev/null
++ . script/_nat64
+++ NAT64_SERVICE=openthread
+++ TAYGA_DEFAULT=/etc/default/tayga
+++ TAYGA_CONF=/etc/tayga.conf
+++ TAYGA_IPV4_ADDR=192.168.255.1
+++ TAYGA_IPV6_ADDR=fdaa:bb:1::1
+++ TAYGA_TUN_V6_ADDR=fdaa:bb:1::2
+++ NAT64_PREFIX=64:ff9b::/96
+++ DYNAMIC_POOL=192.168.255.0/24
+++ NAT44_SERVICE=/etc/init.d/otbr-nat44
+++ WLAN_IFNAMES=eth0
+++ THREAD_IF=wpan0
++ . script/_dns64
+++ BIND_CONF_OPTIONS=/etc/bind/named.conf.options
+++ NAT64_PREFIX=64:ff9b::/96
+++ DNS64_NAMESERVER_ADDR=127.0.0.1
++++ echo 64:ff9b::/96
++++ tr '"/"' '"/"'
+++ DNS64_CONF='dns64 64:ff9b::/96 { clients { thread; }; recursive-only yes; };'
+++ without NAT64
+++ with NAT64
+++ local value
++++ printenv NAT64
+++ value=1
+++ [[ -z 1 ]]
+++ [[ 1 == 1 ]]
+++ without DNS64
+++ with DNS64
+++ local value
++++ printenv DNS64
+++ value=0
+++ [[ -z 0 ]]
+++ [[ 0 == 1 ]]
+++ '[' ubuntu = raspbian ']'
+++ '[' ubuntu = beagleboneblack ']'
+++ '[' ubuntu = ubuntu ']'
+++ RESOLV_CONF_HEAD=/etc/resolvconf/resolv.conf.d/head
++ . script/_firewall
+++ FIREWALL_SERVICE=/etc/init.d/otbr-firewall
+++ sudo modprobe ip6table_filter
+sudo: modprobe: command not found
+++ true
+++ FIREWALL=1
++ OTBR_MDNS=mDNSResponder
++ OT_BACKBONE_CI=0
++ REFERENCE_DEVICE=0
++ main shutdown
++ [[ shutdown == \s\h\u\t\d\o\w\n ]]
++ shift
++ shutdown
++ nat64_stop
++ with NAT64
++ local value
+++ printenv NAT64
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ '[' openthread = tayga ']'
++ nat44_stop
++ with DOCKER
++ local value
+++ printenv DOCKER
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ service otbr-nat44 stop
++ dns64_stop
++ with NAT64
++ local value
+++ printenv NAT64
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ with DNS64
++ local value
+++ printenv DNS64
++ value=0
++ [[ -z 0 ]]
++ [[ 0 == 1 ]]
++ return 0
++ firewall_stop
++ with FIREWALL
++ local value
+++ printenv FIREWALL
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ with DOCKER
++ local value
+++ printenv DOCKER
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ service otbr-firewall stop
++ case "$1" in
++ firewall_stop
++ ip6tables -C FORWARD -o wpan0 -j OTBR_FORWARD_INGRESS
++ ip6tables -D FORWARD -o wpan0 -j OTBR_FORWARD_INGRESS
++ ip6tables -C FORWARD -o wpan0 -j OTBR_FORWARD_INGRESS
+ip6tables: No chain/target/match by that name.
++ ip6tables -L OTBR_FORWARD_INGRESS
+Chain OTBR_FORWARD_INGRESS (0 references)
+target     prot opt source               destination
+DROP       all      anywhere             anywhere             PKTTYPE = unicast
+DROP       all      anywhere             anywhere             match-set otbr-ingress-deny-src src
+ACCEPT     all      anywhere             anywhere             match-set otbr-ingress-allow-dst dst
+DROP       all      anywhere             anywhere             PKTTYPE = unicast
+ACCEPT     all      anywhere             anywhere
++ ip6tables -w -F OTBR_FORWARD_INGRESS
++ ip6tables -w -X OTBR_FORWARD_INGRESS
++ ipset_destroy_if_exist otbr-ingress-deny-src
++ ipset list otbr-ingress-deny-src
+Name: otbr-ingress-deny-src
+Type: hash:net
+Revision: 6
+Header: family inet6 hashsize 1024 maxelem 65536
+Size in memory: 1384
+References: 0
+Number of entries: 2
+Members:
+fd5e:cf94:f94e:736f::/64
+fd3c:cde1:f14b:1::/64
++ ipset destroy otbr-ingress-deny-src
++ ipset_destroy_if_exist otbr-ingress-deny-src-swap
++ ipset list otbr-ingress-deny-src-swap
+Name: otbr-ingress-deny-src-swap
+Type: hash:net
+Revision: 6
+Header: family inet6 hashsize 1024 maxelem 65536
+Size in memory: 1384
+References: 0
+Number of entries: 2
+Members:
+fd5e:cf94:f94e:736f::/64
+fd3c:cde1:f14b:1::/64
++ ipset destroy otbr-ingress-deny-src-swap
++ ipset_destroy_if_exist otbr-ingress-allow-dst
++ ipset list otbr-ingress-allow-dst
+Name: otbr-ingress-allow-dst
+Type: hash:net
+Revision: 6
+Header: family inet6 hashsize 1024 maxelem 65536
+Size in memory: 1312
+References: 0
+Number of entries: 1
+Members:
+fd3c:cde1:f14b:1::/64
++ ipset destroy otbr-ingress-allow-dst
++ ipset_destroy_if_exist otbr-ingress-allow-dst-swap
++ ipset list otbr-ingress-allow-dst-swap
+Name: otbr-ingress-allow-dst-swap
+Type: hash:net
+Revision: 6
+Header: family inet6 hashsize 1024 maxelem 65536
+Size in memory: 1312
+References: 0
+Number of entries: 1
+Members:
+fd3c:cde1:f14b:1::/64
++ ipset destroy otbr-ingress-allow-dst-swap
++ stop_service rsyslog
++ local service_name=rsyslog
++ 0
+/app/script/_initrc: line 110: 0: command not found
++ 1
+/app/script/_initrc: line 112: 1: command not found
++ die 'Unable to find service manager. Try script/console to stop in console mode!'
++ echo ' *** ERROR:  Unable to find service manager. Try script/console to stop in console mode!'
+ *** ERROR:  Unable to find service manager. Try script/console to stop in console mode!
++ exit 1
+RADIO_URL: spinel+hdlc+uart:///dev/ttyUSB0?uart-baudrate=460800&uart-flow-control
+TREL_URL:
+TUN_INTERFACE_NAME: wpan0
+BACKBONE_INTERFACE: eth0
+NAT64_PREFIX: 64:ff9b::/96
+DEBUG_LEVEL: 7
++++ dirname /app/script/server
+++ cd /app/script/..
+++ HAVE_SYSTEMCTL=0
+++ have systemctl
+++ command -v systemctl
+++ HAVE_SERVICE=0
+++ have service
+++ command -v service
+++ HAVE_SERVICE=1
+++ [[ ! -n x ]]
+++ echo 'Current platform is ubuntu'
+Current platform is ubuntu
+++ with BORDER_ROUTING
+++ local value
++++ printenv BORDER_ROUTING
+++ value=1
+++ [[ -z 1 ]]
+++ [[ 1 == 1 ]]
+++ with DHCPV6_PD
+++ local value
++++ printenv DHCPV6_PD
+++ value=
+++ [[ -z '' ]]
+++ [[ -f examples/platforms/ubuntu/default ]]
+++ [[ '' == 1 ]]
+++ with BORDER_ROUTING
+++ local value
++++ printenv BORDER_ROUTING
+++ value=1
+++ [[ -z 1 ]]
+++ [[ 1 == 1 ]]
+++ with NETWORK_MANAGER
+++ local value
++++ printenv NETWORK_MANAGER
+++ value=
+++ [[ -z '' ]]
+++ [[ -f examples/platforms/ubuntu/default ]]
+++ [[ '' == 1 ]]
+++ STAGE_DIR=/app/stage
+++ BUILD_DIR=/app/build
+++ [[ -d /app/stage ]]
+++ [[ -d /app/build ]]
+++ export PATH=/app/stage/usr/bin:/app/stage/usr/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+++ PATH=/app/stage/usr/bin:/app/stage/usr/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
++++ basename /app/script/server
+++ TASKNAME=server
+++ BEFORE_HOOK=examples/platforms/ubuntu/before_server
+++ AFTER_HOOK=examples/platforms/ubuntu/after_server
+++ [[ ! -f examples/platforms/ubuntu/before_server ]]
+++ BEFORE_HOOK=/dev/null
+++ [[ ! -f examples/platforms/ubuntu/after_server ]]
+++ AFTER_HOOK=/dev/null
++ . script/_nat64
+++ NAT64_SERVICE=openthread
+++ TAYGA_DEFAULT=/etc/default/tayga
+++ TAYGA_CONF=/etc/tayga.conf
+++ TAYGA_IPV4_ADDR=192.168.255.1
+++ TAYGA_IPV6_ADDR=fdaa:bb:1::1
+++ TAYGA_TUN_V6_ADDR=fdaa:bb:1::2
+++ NAT64_PREFIX=64:ff9b::/96
+++ DYNAMIC_POOL=192.168.255.0/24
+++ NAT44_SERVICE=/etc/init.d/otbr-nat44
+++ WLAN_IFNAMES=eth0
+++ THREAD_IF=wpan0
++ . script/_dns64
+++ BIND_CONF_OPTIONS=/etc/bind/named.conf.options
+++ NAT64_PREFIX=64:ff9b::/96
+++ DNS64_NAMESERVER_ADDR=127.0.0.1
++++ echo 64:ff9b::/96
++++ tr '"/"' '"/"'
+++ DNS64_CONF='dns64 64:ff9b::/96 { clients { thread; }; recursive-only yes; };'
+++ without NAT64
+++ with NAT64
+++ local value
++++ printenv NAT64
+++ value=1
+++ [[ -z 1 ]]
+++ [[ 1 == 1 ]]
+++ without DNS64
+++ with DNS64
+++ local value
++++ printenv DNS64
+++ value=0
+++ [[ -z 0 ]]
+++ [[ 0 == 1 ]]
+++ '[' ubuntu = raspbian ']'
+++ '[' ubuntu = beagleboneblack ']'
+++ '[' ubuntu = ubuntu ']'
+++ RESOLV_CONF_HEAD=/etc/resolvconf/resolv.conf.d/head
++ . script/_firewall
+++ FIREWALL_SERVICE=/etc/init.d/otbr-firewall
+++ sudo modprobe ip6table_filter
+sudo: modprobe: command not found
+++ true
+++ FIREWALL=1
++ OTBR_MDNS=mDNSResponder
++ OT_BACKBONE_CI=0
++ REFERENCE_DEVICE=0
++ main
++ [[ '' == \s\h\u\t\d\o\w\n ]]
++ startup
++ . /dev/null
++ sudo sysctl --system
+* Applying /etc/sysctl.d/10-console-messages.conf ...
+kernel.printk = 4 4 1 7
+* Applying /etc/sysctl.d/10-ipv6-privacy.conf ...
+net.ipv6.conf.all.use_tempaddr = 2
+net.ipv6.conf.default.use_tempaddr = 2
+* Applying /etc/sysctl.d/10-kernel-hardening.conf ...
+kernel.kptr_restrict = 1
+* Applying /etc/sysctl.d/10-link-restrictions.conf ...
+fs.protected_hardlinks = 1
+fs.protected_symlinks = 1
+* Applying /etc/sysctl.d/10-magic-sysrq.conf ...
+kernel.sysrq = 176
+* Applying /etc/sysctl.d/10-network-security.conf ...
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.tcp_syncookies = 1
+* Applying /etc/sysctl.d/10-ptrace.conf ...
+* Applying /etc/sysctl.d/10-zeropage.conf ...
+vm.mmap_min_addr = 32768
+* Applying /etc/sysctl.d/60-otbr-accept-ra.conf ...
+net.ipv6.conf.eth0.accept_ra = 2
+net.ipv6.conf.eth0.accept_ra_rt_info_max_plen = 64
+* Applying /etc/sysctl.d/60-otbr-ip-forward.conf ...
+net.ipv6.conf.all.forwarding = 1
+net.ipv4.ip_forward = 1
+* Applying /etc/sysctl.conf ...
++ nat64_start
++ with NAT64
++ local value
+++ printenv NAT64
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ '[' openthread = tayga ']'
++ nat44_start
++ with DOCKER
++ local value
+++ printenv DOCKER
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ service otbr-nat44 start
++ dns64_start
++ with NAT64
++ local value
+++ printenv NAT64
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ with DNS64
++ local value
+++ printenv DNS64
++ value=0
++ [[ -z 0 ]]
++ [[ 0 == 1 ]]
++ return 0
++ firewall_start
++ with FIREWALL
++ local value
+++ printenv FIREWALL
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ with DOCKER
++ local value
+++ printenv DOCKER
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ service otbr-firewall start
++ case "$1" in
++ firewall_start
++ firewall_stop
++ ip6tables -C FORWARD -o wpan0 -j OTBR_FORWARD_INGRESS
+ip6tables v1.6.1: Couldn't load target `OTBR_FORWARD_INGRESS':No such file or directory
+
+Try `ip6tables -h' or 'ip6tables --help' for more information.
++ ip6tables -L OTBR_FORWARD_INGRESS
+ip6tables: No chain/target/match by that name.
++ ipset_destroy_if_exist otbr-ingress-deny-src
++ ipset list otbr-ingress-deny-src
+ipset v6.34: Kernel support protocol versions 6-7 while userspace supports protocol versions 6-6
+The set with the given name does not exist
++ ipset_destroy_if_exist otbr-ingress-deny-src-swap
++ ipset list otbr-ingress-deny-src-swap
+ipset v6.34: Kernel support protocol versions 6-7 while userspace supports protocol versions 6-6
+The set with the given name does not exist
++ ipset_destroy_if_exist otbr-ingress-allow-dst
++ ipset list otbr-ingress-allow-dst
+ipset v6.34: Kernel support protocol versions 6-7 while userspace supports protocol versions 6-6
+The set with the given name does not exist
++ ipset_destroy_if_exist otbr-ingress-allow-dst-swap
++ ipset list otbr-ingress-allow-dst-swap
+ipset v6.34: Kernel support protocol versions 6-7 while userspace supports protocol versions 6-6
+The set with the given name does not exist
++ ipset create -exist otbr-ingress-deny-src hash:net family inet6
++ ipset create -exist otbr-ingress-deny-src-swap hash:net family inet6
++ ipset create -exist otbr-ingress-allow-dst hash:net family inet6
++ ipset create -exist otbr-ingress-allow-dst-swap hash:net family inet6
++ ip6tables -N OTBR_FORWARD_INGRESS
++ ip6tables -I FORWARD 1 -o wpan0 -j OTBR_FORWARD_INGRESS
++ ip6tables -A OTBR_FORWARD_INGRESS -m pkttype --pkt-type unicast -i wpan0 -j DROP
++ ip6tables -A OTBR_FORWARD_INGRESS -m set --match-set otbr-ingress-deny-src src -j DROP
++ ip6tables -A OTBR_FORWARD_INGRESS -m set --match-set otbr-ingress-allow-dst dst -j ACCEPT
++ ip6tables -A OTBR_FORWARD_INGRESS -m pkttype --pkt-type unicast -j DROP
++ ip6tables -A OTBR_FORWARD_INGRESS -j ACCEPT
++ start_service rsyslog
++ local service_name=rsyslog
++ [[ 0 == 1 ]]
++ [[ 1 == 1 ]]
++ sudo service rsyslog status
+ * rsyslogd is not running
++ sudo service rsyslog start
+ * Starting enhanced syslogd rsyslogd                                    [ OK ]
++ start_service dbus
++ local service_name=dbus
++ [[ 0 == 1 ]]
++ [[ 1 == 1 ]]
++ sudo service dbus status
+ * dbus is not running
++ sudo service dbus start
+ * Removing stale PID file /var/run/dbus/pid.
+ * Starting system message bus dbus                                      [ OK ]
++ [[ mDNSResponder == \a\v\a\h\i ]]
++ [[ 0 == 1 ]]
++ [[ 0 == 1 ]]
++ have service
++ command -v service
++ sudo service mdns status
+Usage: /etc/init.d/mDNS {start|stop|reload|restart}
++ sudo service mdns start
+Starting Apple Darwin Multicast DNS / DNS Service Discovery daemon: mdnsd.
++ without WEB_GUI
++ with WEB_GUI
++ local value
+++ printenv WEB_GUI
++ value=1
++ [[ -z 1 ]]
++ [[ 1 == 1 ]]
++ start_service otbr-web
++ local service_name=otbr-web
++ [[ 0 == 1 ]]
++ [[ 1 == 1 ]]
++ sudo service otbr-web status
+ * otbr-web is not running
++ sudo service otbr-web start
+ * Removing stale PID file /var/run/otbr-web.pid.
+ * Starting thread web interface otbr-web                                [ OK ]
++ start_service otbr-agent
++ local service_name=otbr-agent
++ [[ 0 == 1 ]]
++ [[ 1 == 1 ]]
++ sudo service otbr-agent status
+ * otbr-agent is not running
++ sudo service otbr-agent start
+ * Removing stale PID file /var/run/otbr-agent.pid.
+ * Starting thread border agent otbr-agent                               [ OK ]
++ . /dev/null
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.121 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:78, channel:13, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.121 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:1, isARetx:0, skipAes:1, txDelay:0, txDelayBase:0
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.132 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.132 [I] MeshForwarder-: Sent IPv6 UDP msg, len:83, chksum:1339, ecn:no, to:0xffff, sec:yes, prio:net
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.132 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.132 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.133 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_SET, key:PHY_CHAN, channel:15
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.133 [D] P-RadioSpinel-: Wait response: tid=10 key=33
+Oct  8 20:18:49 c05b7b3d1f41 otbr-agent[219]: 00:13:13.135 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_IS, key:PHY_CHAN, channel:15
+Oct  8 20:18:54 c05b7b3d1f41 mDNSResponder: Default: mDNSResponder (Engineering Build) (Sep 30 2024 06:19:33) starting
+Oct  8 20:18:54 c05b7b3d1f41 rsyslogd: rsyslogd's groupid changed to 101
+Oct  8 20:18:54 c05b7b3d1f41 rsyslogd: rsyslogd's userid changed to 101
+Oct  8 20:18:54 c05b7b3d1f41 rsyslogd:  [origin software="rsyslogd" swVersion="8.32.0" x-pid="98" x-info="http://www.rsyslog.com"] start
+Oct  8 20:18:56 c05b7b3d1f41 otbr-web[184]: [INFO]-WEB-----: Running 0.3.0-9ca3b36
+Oct  8 20:18:56 c05b7b3d1f41 otbr-web[184]: [INFO]-WEB-----: Border router web started on wpan0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-web[184]: [ERR ]-WEB-----: OpenThread daemon is not running.
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent: [NOTE]-AGENT---: Backbone interface: eth0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [NOTE]-AGENT---: Running 0.3.0-9ca3b36
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [NOTE]-AGENT---: Thread version: 1.4.0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [NOTE]-AGENT---: Thread interface: wpan0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [NOTE]-AGENT---: Radio URL: spinel+hdlc+uart:///dev/ttyUSB0?uart-baudrate=460800&uart-flow-control
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [NOTE]-ILS-----: Infra link selected: eth0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-RCP_HOS-: OpenThread log level changed to 5
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.095 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:0, cmd:RESET
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.095 [D] P-SpinelDrive-: Waiting response: key=0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.098 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:0, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:RESET_POWER_ON
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.098 [I] P-SpinelDrive-: co-processor reset: RESET_POWER_ON
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.098 [C] P-SpinelDrive-: Software reset co-processor successfully
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.098 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_GET, key:PROTOCOL_VERSION
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.098 [D] P-SpinelDrive-: Waiting response: key=1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.101 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:PROTOCOL_VERSION, major:4, minor:3
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.101 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_GET, key:NCP_VERSION
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.101 [D] P-SpinelDrive-: Waiting response: key=2
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.105 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:NCP_VERSION, version:SL-OPENTHREAD/2.4.0.0_GitHub-7074a43e4; EFR32; Aug 20 2024 16:30:57
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.105 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_GET, key:CAPS
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.105 [D] P-SpinelDrive-: Waiting response: key=5
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.108 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:CAPS, caps:COUNTERS UNSOL_UPDATE_FILTER 802_15_4_2450MHZ_OQPSK CONFIG_RADIO MAC_RAW RCP_API_VERSION RCP_MIN_HOST_API_VERSION RCP_RESET_TO_BOOTLOADER OPENTHREAD_LOG_METADATA
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Ephemeral Key is: enabled during initialization
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.109 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_GET, key:HWADDR
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.109 [D] P-RadioSpinel-: Wait response: tid=1 key=8
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.111 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:HWADDR, eui64:bc026efffea9ce5d
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.111 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_GET, key:RCP_API_VERSION
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.112 [D] P-RadioSpinel-: Wait response: tid=2 key=176
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.114 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_IS, key:RCP_API_VERSION, version:9
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.114 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_GET, key:RCP_MIN_HOST_API_VERSION
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.114 [D] P-RadioSpinel-: Wait response: tid=3 key=177
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.117 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_IS, key:RCP_MIN_HOST_API_VERSION, min-host-version:4
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.117 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_GET, key:RADIO_CAPS
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.117 [D] P-RadioSpinel-: Wait response: tid=4 key=4619
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.120 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_IS, key:RADIO_CAPS, caps:255
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.121 [I] P-Netif-------: Sent request#1 to set addr_gen_mode to 1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 50d.03:04:23.122 [I] P-Resolver----: Got nameserver #0: 127.0.0.11
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.000 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_GET, key:PHY_CHAN_SUPPORTED
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.000 [D] P-RadioSpinel-: Wait response: tid=5 key=34
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.003 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_IS, key:PHY_CHAN_SUPPORTED, channelMask:0x07fff800
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.003 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_SET, key:PHY_ENABLED, enabled:1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.003 [D] P-RadioSpinel-: Wait response: tid=6 key=32
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.006 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_IS, key:PHY_ENABLED, enabled:1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.006 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_SET, key:MAC_15_4_PANID, panid:0xffff
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.006 [D] P-RadioSpinel-: Wait response: tid=7 key=54
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.009 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_IS, key:MAC_15_4_PANID, panid:0xffff
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.009 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_SET, key:MAC_15_4_SADDR, saddr:0x0000
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.009 [D] P-RadioSpinel-: Wait response: tid=8 key=53
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.011 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_IS, key:MAC_15_4_SADDR, saddr:0x0000
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.011 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_GET, key:PHY_RX_SENSITIVITY
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.011 [D] P-RadioSpinel-: Wait response: tid=9 key=39
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.014 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_IS, key:PHY_RX_SENSITIVITY, sensitivity:-100
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.014 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_SET, key:RCP_MAC_KEY, keyIdMode:8, keyId:1, prevKey:***, currKey:***, nextKey:***
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.014 [D] P-RadioSpinel-: Wait response: tid=10 key=2048
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.018 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.018 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_SET, key:MAC_15_4_LADDR, laddr:6aa8c76e77d8969b
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.018 [D] P-RadioSpinel-: Wait response: tid=11 key=52
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.021 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_IS, key:MAC_15_4_LADDR, laddr:6aa8c76e77d8969b
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.021 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_SET, key:MAC_15_4_SADDR, saddr:0xfffe
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.021 [D] P-RadioSpinel-: Wait response: tid=12 key=53
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.024 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_IS, key:MAC_15_4_SADDR, saddr:0xfffe
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.024 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_SET, key:MAC_SRC_MATCH_SHORT_ADDRESSES, saddr:none
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.024 [D] P-RadioSpinel-: Wait response: tid=13 key=4868
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.026 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.026 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_SET, key:MAC_SRC_MATCH_EXTENDED_ADDRESSES, extaddr:none
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.026 [D] P-RadioSpinel-: Wait response: tid=14 key=4869
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.029 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.029 [I] CslTxScheduler: Bus TX Time: 2605 usec, Latency: 0 usec. Calculated CSL Frame Request Ahead: 4605 usec
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.029 [I] ChildSupervsn-: Timeout: 0 -> 190
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.030 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_SET, key:RCP_MAC_KEY, keyIdMode:8, keyId:1, prevKey:***, currKey:***, nextKey:***
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.030 [D] P-RadioSpinel-: Wait response: tid=15 key=2048
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.033 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.033 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_SET, key:MAC_15_4_PANID, panid:0x7e5b
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.034 [D] P-RadioSpinel-: Wait response: tid=1 key=54
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.036 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:MAC_15_4_PANID, panid:0x7e5b
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.036 [I] Settings------: Read NetworkInfo {rloc:0x1000, extaddr:321ebabc06f1b767, role:leader, mode:0x0f, version:5, keyseq:0x0, ...
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.036 [I] Settings------: ... pid:0x6e4af550, mlecntr:0x3ef, maccntr:0x3e8, mliid:446f36bfb1ac3d4b}
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.036 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_SET, key:RCP_MAC_FRAME_COUNTER, counter:1000
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.036 [D] P-RadioSpinel-: Wait response: tid=2 key=2049
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.039 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.039 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_SET, key:MAC_15_4_SADDR, saddr:0x1000
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.039 [D] P-RadioSpinel-: Wait response: tid=3 key=53
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.042 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_IS, key:MAC_15_4_SADDR, saddr:0x1000
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.042 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_SET, key:MAC_15_4_LADDR, laddr:321ebabc06f1b767
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.042 [D] P-RadioSpinel-: Wait response: tid=4 key=52
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_IS, key:MAC_15_4_LADDR, laddr:321ebabc06f1b767
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [I] RoutingManager: Initializing - InfraIfIndex:928
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [I] InfraIf-------: Init infra netif 928
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [I] Settings------: Read BrUlaPrefix fd3c:cde1:f14b::/48
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [N] RoutingManager: BR ULA prefix: fd3c:cde1:f14b::/48 (loaded)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [I] RoutingManager: Generated local OMR prefix: fd3c:cde1:f14b:1::/64
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [I] RoutingManager: Generated local NAT64 prefix: fd3c:cde1:f14b:2:0:0::/96
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [I] RoutingManager: Restored old prefix fde7:6e9a:61f6:7583::/64, lifetime:1800
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.045 [N] RoutingManager: Local on-link prefix: fde7:6e9a:61f6:7583::/64
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.046 [I] RoutingManager: Local on-link prefix state: Removed -> Deprecating (fde7:6e9a:61f6:7583::/64)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.046 [I] InfraIf-------: State changed: NOT RUNNING -> RUNNING
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.046 [I] RoutingManager: Enabling
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.046 [I] Nat64---------: IPv4 CIDR for NAT64: 192.168.255.0/24 (actual address pool: 192.168.255.1 - 192.168.255.254, 254 addresses)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-UTILS---: Set state callback: OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.046 [I] Nat64---------: NAT64 translator is now NotRunning
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Start Thread Border Agent
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.046 [I] Settings------: Read BorderAgentId {id:fed52416a34ab69655b9877aa7f65c11}
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Registering service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.047 [I] BbrLocal------: Add Domain Prefix: ::/0, NotFound
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.047 [I] BbrLocal------: Add BBR Service: seqno (1), delay (5s), timeout (3600s), InvalidState
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-ADPROXY-: Started
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-DPROXY--: Started
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-APP-----: Co-processor version: SL-OPENTHREAD/2.4.0.0_GitHub-7074a43e4; EFR32; Aug 20 2024 16:30:57
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-APP-----: Thread Border Router started on AIL eth0.
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] Notifier------: StateChanged (0x521fc310) [MLAddr KeySeqCntr NetData Channel PanId NetName ExtPanId NetworkKey PSKc ...
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] Notifier------: StateChanged (0x521fc310) ... SecPolicy BbrState ActDset Nat64]
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] Bbr-----------: Start listening on port 61631
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] Bbr-----------: Backbone TMF subscribes ff32:40:fd5e:cf94:f94e:736f:0:3: OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] BbrManager----: Start Backbone TMF agent: OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] AnnounceSender: ChannelMask:{ 11-26 }, period:21500
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] AnnounceSender: StartingChannel:15
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.049 [I] AnnounceSender: StartingChannel:15
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.054 [I] Platform------: Execute command `ipset flush otbr-ingress-allow-dst-swap` = 0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.059 [I] Platform------: Execute command `ipset flush otbr-ingress-deny-src-swap` = 0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.064 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd5e:cf94:f94e:736f::/64 -exist` = 0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.069 [I] Platform------: Execute command `ipset swap otbr-ingress-deny-src-swap otbr-ingress-deny-src` = 0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.074 [I] Platform------: Execute command `ipset swap otbr-ingress-allow-dst-swap otbr-ingress-allow-dst` = 0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.075 [I] P-Netif-------: NAT64 CIDR updated to 192.168.255.0/24.
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.075 [I] P-Netif-------: Sent request#2 to delete route 192.168.255.0/24
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.075 [I] P-Netif-------: Deleting route for NAT64
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.075 [I] P-McastRtMgr--: Disable: OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [DEBG]-BBA-----: BackboneAgent: HandleBackboneRouterState: state=1, mBackboneRouterState=0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [DEBG]-UTILS---: Signal io.openthread.BorderRouter.ActiveDatasetTlvs
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [DEBG]-DBUS----: { "io.openthread.BorderRouter", [ ActiveDatasetTlvs:{ [ 14, 8, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 15, 74, 3, 0, 0, 24, 53, 6, 0, 4, 0, 31, 255, 224, 2, 8, 231, 110, 154, 97, 246, 84, 117, 131, 7, 8, 253, 94, 207, 148, 249, 78, 115, 111, 5, 16, 71, 58, 238, 176, 177, 207, 156, 45, 174, 212, 15, 193, 39, 196, 208, 13, 3, 14, 104, 97, 45, 116, 104, 114, 101, 97, 100, 45, 55, 101, 53, 98, 1, 2, 126, 91, 4, 16, 196, 170, 231, 202, 33, 206, 14, 63, 51, 182, 89, 78, 223, 111, 25, 44, 12, 4, 2, 160, 247, 248, ], }, ], [ ], }
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.075 [I] RouterTable---: Route table
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.075 [I] P-Netif-------: Host netif is down
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.076 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_SET, key:PHY_CHAN, channel:15
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.076 [D] P-RadioSpinel-: Wait response: tid=5 key=33
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.078 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_IS, key:PHY_CHAN, channel:15
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.078 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_SET, key:MAC_RAW_STREAM_ENABLED, enabled:1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.078 [D] P-RadioSpinel-: Wait response: tid=6 key=55
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.081 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_IS, key:MAC_RAW_STREAM_ENABLED, enabled:1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Added multicast address ff02::1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Added multicast address ff03::1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Added multicast address ff03::fc
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Sent request#3 to add fe80::301e:babc:6f1:b767/64
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] DnssdServer---: Started
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] BbrLocal------: Remove BBR Service: seqno (1), delay (5s), timeout (3600s), NotFound
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [N] Mle-----------: Role disabled -> detached
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Sent request#4 to add fd5e:cf94:f94e:736f:446f:36bf:b1ac:3d4b/64
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Added multicast address ff32:40:fd5e:cf94:f94e:736f:0:1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Added multicast address ff33:40:fd5e:cf94:f94e:736f:0:1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] P-Netif-------: Sent request#5 to add fd5e:cf94:f94e:736f:0:ff:fe00:1000/64
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] Mle-----------: Attempt to become router
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.082 [I] Settings------: Read NetworkInfo {rloc:0x1000, extaddr:321ebabc06f1b767, role:leader, mode:0x0f, version:5, keyseq:0x0, ...
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.083 [I] Settings------: ... pid:0x6e4af550, mlecntr:0x3ef, maccntr:0x3e8, mliid:446f36bfb1ac3d4b}
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.085 [I] Settings------: Saved NetworkInfo {rloc:0x1000, extaddr:321ebabc06f1b767, role:leader, mode:0x0f, version:5, keyseq:0x0, ...
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.085 [I] Settings------: ... pid:0x6e4af550, mlecntr:0x7d8, maccntr:0x7d0, mliid:446f36bfb1ac3d4b}
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.085 [I] Mle-----------: Send Link Request (ff02:0:0:0:0:0:0:2)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.085 [I] Notifier------: StateChanged (0x0100102d) [Ip6+ Role LLAddr Rloc+ Ip6Mult+ NetifState]
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.085 [I] AnnounceSender: Stopped
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.085 [N] P-Netif-------: Changing interface state to up.
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.086 [I] P-Netif-------: Sent request#6 to delete route 192.168.255.0/24
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.086 [I] P-Netif-------: Deleting route for NAT64
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Thread is down
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing existing service OpenThread BorderRouter #B767._meshcop._udp: outdated
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Cancelled previous publishing meshcop service OpenThread BorderRouter #B767._meshcop._udp.local
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Cancelled previous publishing meshcop service OpenThread BorderRouter #B767._meshcop._udp.local
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Registering service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [DEBG]-UTILS---: Signal io.openthread.BorderRouter.DeviceRole
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: [DEBG]-DBUS----: { "io.openthread.BorderRouter", [ DeviceRole:{ "detached", }, ], [ ], }
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.087 [D] P-RadioSpinel-: Trying to get RCP time offset
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.087 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_GET, key:TIMESTAMP
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.087 [D] P-RadioSpinel-: Wait response: tid=7 key=2050
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.091 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_IS, key:TIMESTAMP, timestamp:1742151887
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.091 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:61, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.091 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.091 [I] P-Netif-------: Succeeded to process request#1
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [W] P-Netif-------: Failed to process request#2: No such process
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [I] P-Netif-------: ADD [U] fe80::301e:babc:6f1:b767
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [I] P-Netif-------: Succeeded to process request#3
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [I] P-Netif-------: ADD [U] fd5e:cf94:f94e:736f:446f:36bf:b1ac:3d4b
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [I] P-Netif-------: Succeeded to process request#4
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [I] P-Netif-------: ADD [U] fd5e:cf94:f94e:736f:0:ff:fe00:1000
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.092 [I] P-Netif-------: Succeeded to process request#5
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.093 [I] P-Netif-------: Host netif is up
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.093 [W] P-Netif-------: Failed to process request#6: No such process
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff02::16
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff02::2 (rejected)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] Notifier------: StateChanged (0x00001000) [Ip6Mult+]
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.097 [I] P-Netif-------: ADD [M] ff02::2 (rejected)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.099 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.099 [I] MeshForwarder-: Sent IPv6 UDP msg, len:82, chksum:fb54, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.099 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.099 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff02::2 (rejected)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.469 [I] P-Netif-------: ADD [M] ff02::2 (rejected)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff02::2 (rejected)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:18:56 c05b7b3d1f41 otbr-agent[219]: 00:00:00.470 [I] P-Netif-------: ADD [M] ff02::2 (rejected)
+Oct  8 20:18:57 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Successfully registered service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:18:57 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Result of publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local: OK
+Oct  8 20:19:01 c05b7b3d1f41 otbr-agent[219]: 00:00:05.066 [I] Mle-----------: Send Link Request (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:01 c05b7b3d1f41 otbr-agent[219]: 00:00:05.066 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:61, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:01 c05b7b3d1f41 otbr-agent[219]: 00:00:05.066 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:01 c05b7b3d1f41 otbr-agent[219]: 00:00:05.076 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:01 c05b7b3d1f41 otbr-agent[219]: 00:00:05.076 [I] MeshForwarder-: Sent IPv6 UDP msg, len:82, chksum:0432, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:01 c05b7b3d1f41 otbr-agent[219]: 00:00:05.076 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:01 c05b7b3d1f41 otbr-agent[219]: 00:00:05.076 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:06 c05b7b3d1f41 otbr-agent[219]: 00:00:09.779 [I] Mle-----------: Send Link Request (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:06 c05b7b3d1f41 otbr-agent[219]: 00:00:09.779 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:61, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:06 c05b7b3d1f41 otbr-agent[219]: 00:00:09.779 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:06 c05b7b3d1f41 otbr-agent[219]: 00:00:09.788 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:06 c05b7b3d1f41 otbr-agent[219]: 00:00:09.788 [I] MeshForwarder-: Sent IPv6 UDP msg, len:82, chksum:00bf, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:06 c05b7b3d1f41 otbr-agent[219]: 00:00:09.788 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:06 c05b7b3d1f41 otbr-agent[219]: 00:00:09.788 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:11 c05b7b3d1f41 otbr-agent[219]: 00:00:14.967 [I] Mle-----------: Send Link Request (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:11 c05b7b3d1f41 otbr-agent[219]: 00:00:14.967 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:61, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:11 c05b7b3d1f41 otbr-agent[219]: 00:00:14.967 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:11 c05b7b3d1f41 otbr-agent[219]: 00:00:14.975 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:11 c05b7b3d1f41 otbr-agent[219]: 00:00:14.975 [I] MeshForwarder-: Sent IPv6 UDP msg, len:82, chksum:df22, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:11 c05b7b3d1f41 otbr-agent[219]: 00:00:14.975 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:11 c05b7b3d1f41 otbr-agent[219]: 00:00:14.975 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:16 c05b7b3d1f41 otbr-agent[219]: 00:00:20.065 [I] Mle-----------: Send Link Request (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:16 c05b7b3d1f41 otbr-agent[219]: 00:00:20.065 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:61, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:16 c05b7b3d1f41 otbr-agent[219]: 00:00:20.065 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:16 c05b7b3d1f41 otbr-agent[219]: 00:00:20.073 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:16 c05b7b3d1f41 otbr-agent[219]: 00:00:20.074 [I] MeshForwarder-: Sent IPv6 UDP msg, len:82, chksum:6cae, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:16 c05b7b3d1f41 otbr-agent[219]: 00:00:20.074 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:16 c05b7b3d1f41 otbr-agent[219]: 00:00:20.074 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:21 c05b7b3d1f41 otbr-agent[219]: 00:00:25.014 [I] Mle-----------: Send Link Request (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:21 c05b7b3d1f41 otbr-agent[219]: 00:00:25.014 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:61, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:21 c05b7b3d1f41 otbr-agent[219]: 00:00:25.014 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:21 c05b7b3d1f41 otbr-agent[219]: 00:00:25.024 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:21 c05b7b3d1f41 otbr-agent[219]: 00:00:25.024 [I] MeshForwarder-: Sent IPv6 UDP msg, len:82, chksum:8bd7, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:21 c05b7b3d1f41 otbr-agent[219]: 00:00:25.024 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:21 c05b7b3d1f41 otbr-agent[219]: 00:00:25.024 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.896 [I] BbrLocal------: Remove BBR Service: seqno (1), delay (5s), timeout (3600s), NotFound
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.897 [N] Mle-----------: RLOC16 1000 -> fffe
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.899 [I] P-Netif-------: Sent request#7 to remove fd5e:cf94:f94e:736f:0:ff:fe00:1000/64
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.899 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_SET, key:MAC_15_4_SADDR, saddr:0xfffe
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.899 [D] P-RadioSpinel-: Wait response: tid=14 key=53
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.902 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_IS, key:MAC_15_4_SADDR, saddr:0xfffe
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.902 [I] Mle-----------: AttachState Idle -> Start
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.902 [I] Notifier------: StateChanged (0x10000040) [Rloc- ActDset]
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: [DEBG]-UTILS---: Signal io.openthread.BorderRouter.ActiveDatasetTlvs
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: [DEBG]-DBUS----: { "io.openthread.BorderRouter", [ ActiveDatasetTlvs:{ [ 14, 8, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 15, 74, 3, 0, 0, 24, 53, 6, 0, 4, 0, 31, 255, 224, 2, 8, 231, 110, 154, 97, 246, 84, 117, 131, 7, 8, 253, 94, 207, 148, 249, 78, 115, 111, 5, 16, 71, 58, 238, 176, 177, 207, 156, 45, 174, 212, 15, 193, 39, 196, 208, 13, 3, 14, 104, 97, 45, 116, 104, 114, 101, 97, 100, 45, 55, 101, 53, 98, 1, 2, 126, 91, 4, 16, 196, 170, 231, 202, 33, 206, 14, 63, 51, 182, 89, 78, 223, 111, 25, 44, 12, 4, 2, 160, 247, 248, ], }, ], [ ], }
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.903 [I] P-Netif-------: DEL [U] fd5e:cf94:f94e:736f:0:ff:fe00:1000 (not found, ignored)
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.903 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.903 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.903 [I] P-Netif-------: Succeeded to process request#7
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.997 [N] Mle-----------: Attach attempt 1, AnyPartition reattaching with Active Dataset
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.997 [I] Mle-----------: AttachState Start -> ParentReq
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.997 [I] Mle-----------: Send Parent Request to routers (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.997 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:63, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:26.997 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:27.007 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:27.008 [I] MeshForwarder-: Sent IPv6 UDP msg, len:84, chksum:7dc2, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:27.008 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:23 c05b7b3d1f41 otbr-agent[219]: 00:00:27.008 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:27.747 [I] Mle-----------: Send Parent Request to routers (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:27.748 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:63, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:27.748 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:27.757 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:27.757 [I] MeshForwarder-: Sent IPv6 UDP msg, len:84, chksum:f56d, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:27.757 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:27.757 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:28.498 [I] Mle-----------: Send Parent Request to routers and REEDs (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:28.499 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:63, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:28.499 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:28.507 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:28.508 [I] MeshForwarder-: Sent IPv6 UDP msg, len:84, chksum:f9c8, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:28.508 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:24 c05b7b3d1f41 otbr-agent[219]: 00:00:28.508 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:26 c05b7b3d1f41 otbr-agent[219]: 00:00:29.749 [I] Mle-----------: Send Parent Request to routers and REEDs (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:26 c05b7b3d1f41 otbr-agent[219]: 00:00:29.750 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:63, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:26 c05b7b3d1f41 otbr-agent[219]: 00:00:29.750 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:26 c05b7b3d1f41 otbr-agent[219]: 00:00:29.758 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:26 c05b7b3d1f41 otbr-agent[219]: 00:00:29.758 [I] MeshForwarder-: Sent IPv6 UDP msg, len:84, chksum:1f2d, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:26 c05b7b3d1f41 otbr-agent[219]: 00:00:29.759 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:26 c05b7b3d1f41 otbr-agent[219]: 00:00:29.759 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:27 c05b7b3d1f41 otbr-agent[219]: 00:00:31.000 [I] Mle-----------: Send Parent Request to routers and REEDs (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:27 c05b7b3d1f41 otbr-agent[219]: 00:00:31.001 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:63, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:27 c05b7b3d1f41 otbr-agent[219]: 00:00:31.001 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:27 c05b7b3d1f41 otbr-agent[219]: 00:00:31.010 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:27 c05b7b3d1f41 otbr-agent[219]: 00:00:31.010 [I] MeshForwarder-: Sent IPv6 UDP msg, len:84, chksum:6773, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:27 c05b7b3d1f41 otbr-agent[219]: 00:00:31.011 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:27 c05b7b3d1f41 otbr-agent[219]: 00:00:31.011 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:28 c05b7b3d1f41 otbr-agent[219]: 00:00:32.250 [I] Mle-----------: Send Parent Request to routers and REEDs (ff02:0:0:0:0:0:0:2)
+Oct  8 20:19:28 c05b7b3d1f41 otbr-agent[219]: 00:00:32.251 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:63, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:28 c05b7b3d1f41 otbr-agent[219]: 00:00:32.251 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:28 c05b7b3d1f41 otbr-agent[219]: 00:00:32.258 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:28 c05b7b3d1f41 otbr-agent[219]: 00:00:32.259 [I] MeshForwarder-: Sent IPv6 UDP msg, len:84, chksum:5e93, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:28 c05b7b3d1f41 otbr-agent[219]: 00:00:32.259 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:28 c05b7b3d1f41 otbr-agent[219]: 00:00:32.259 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:2]:19788
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.500 [I] Mle-----------: AttachState ParentReq -> Idle
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.500 [N] RouterTable---: Allocate router id 4
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.501 [N] Mle-----------: RLOC16 fffe -> 1000
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.501 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_SET, key:MAC_15_4_SADDR, saddr:0x1000
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.501 [D] P-RadioSpinel-: Wait response: tid=6 key=53
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.503 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_IS, key:MAC_15_4_SADDR, saddr:0x1000
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.504 [I] P-Netif-------: Sent request#8 to add fd5e:cf94:f94e:736f:0:ff:fe00:1000/64
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.504 [N] Mle-----------: Role detached -> leader
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.504 [I] P-Netif-------: Added multicast address ff02::2
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.504 [I] P-Netif-------: Added multicast address ff03::2
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.505 [I] P-Netif-------: Sent request#9 to add fd5e:cf94:f94e:736f:0:ff:fe00:fc00/64
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.505 [N] Mle-----------: Partition ID 0x2f4e8b7b
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.505 [I] RouterTable---: Route table
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.505 [I] RouterTable---:      4 0x1000 - me - leader
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.505 [I] Notifier------: StateChanged (0x100012a5) [Ip6+ Role Rloc+ PartitionId NetData Ip6Mult+ ActDset]
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.505 [I] Mle-----------: Send Data Response (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.505 [I] BbrLeader-----: PBBR state: None
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.507 [I] Settings------: Saved NetworkInfo {rloc:0x1000, extaddr:321ebabc06f1b767, role:leader, mode:0x0f, version:5, keyseq:0x0, ...
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.507 [I] Settings------: ... pid:0x2f4e8b7b, mlecntr:0x7e4, maccntr:0x7d0, mliid:446f36bfb1ac3d4b}
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.507 [I] AnnounceSender: Started
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] SecTransport--: State: Closed -> Open
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] BorderAgent---: Border Agent start listening on port 49154
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] RoutingManager: RIO Preference changed: low -> medium
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] RoutingManager: Starting
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] RoutingManager: RoutePublisher state: none -> ula
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] NetDataPublshr: Publishing ExternalRoute fc00::/7
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] NetDataPublshr: ExternalRoute fc00::/7 - State: NoEntry -> ToAdd
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:ToAdd) in netdata - total:0, preferred:0, desired:10
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.508 [I] NetDataPublshr: ExternalRoute fc00::/7 - State: ToAdd -> Adding
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.509 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:Adding) - update in 379 msec
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.509 [I] RoutingManager: RsSender: Starting - will send first RS in 429 msec
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.509 [I] RoutingManager: Starting Nat64PrefixManager
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.509 [I] RoutingManager: Will evaluate routing policy in 00:03.640 (3640 msec)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.509 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:Adding) in netdata - total:0, preferred:0, desired:10
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.514 [I] Platform------: Execute command `ipset flush otbr-ingress-allow-dst-swap` = 0
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.518 [I] Platform------: Execute command `ipset flush otbr-ingress-deny-src-swap` = 0
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.523 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd5e:cf94:f94e:736f::/64 -exist` = 0
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.528 [I] Platform------: Execute command `ipset swap otbr-ingress-deny-src-swap otbr-ingress-deny-src` = 0
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.533 [I] Platform------: Execute command `ipset swap otbr-ingress-allow-dst-swap otbr-ingress-allow-dst` = 0
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Thread is up
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing existing service OpenThread BorderRouter #B767._meshcop._udp: outdated
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Registering service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [DEBG]-UTILS---: Signal io.openthread.BorderRouter.DeviceRole
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [DEBG]-DBUS----: { "io.openthread.BorderRouter", [ DeviceRole:{ "leader", }, ], [ ], }
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [DEBG]-UTILS---: Signal io.openthread.BorderRouter.ActiveDatasetTlvs
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: [DEBG]-DBUS----: { "io.openthread.BorderRouter", [ ActiveDatasetTlvs:{ [ 14, 8, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 15, 74, 3, 0, 0, 24, 53, 6, 0, 4, 0, 31, 255, 224, 2, 8, 231, 110, 154, 97, 246, 84, 117, 131, 7, 8, 253, 94, 207, 148, 249, 78, 115, 111, 5, 16, 71, 58, 238, 176, 177, 207, 156, 45, 174, 212, 15, 193, 39, 196, 208, 13, 3, 14, 104, 97, 45, 116, 104, 114, 101, 97, 100, 45, 55, 101, 53, 98, 1, 2, 126, 91, 4, 16, 196, 170, 231, 202, 33, 206, 14, 63, 51, 182, 89, 78, 223, 111, 25, 44, 12, 4, 2, 160, 247, 248, ], }, ], [ ], }
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.535 [I] P-InfraNetif--: getaddrinfo_a requested for ipv4only.arpa
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.535 [I] RoutingManager: Discovering infraif NAT64 prefix
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.535 [I] RoutingManager: NAT64 prefix timer scheduled in 300 seconds
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.535 [I] P-Netif-------: ADD [U] fd5e:cf94:f94e:736f:0:ff:fe00:1000
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.536 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.536 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.536 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.536 [I] P-Netif-------: Succeeded to process request#8
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [I] P-Netif-------: ADD [U] fd5e:cf94:f94e:736f:0:ff:fe00:fc00
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.537 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.538 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.538 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.538 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.538 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.538 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.539 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.539 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.540 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:75, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.540 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.540 [I] P-Netif-------: Succeeded to process request#9
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.541 [I] P-InfraNetif--: Handling host address response for ipv4only.arpa
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.541 [I] RoutingManager: Infraif NAT64 prefix: none
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.541 [I] RoutingManager: Will evaluate routing policy in 00:03.920 (3920 msec)
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.549 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.549 [I] MeshForwarder-: Sent IPv6 UDP msg, len:96, chksum:13e2, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.549 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:29 c05b7b3d1f41 otbr-agent[219]: 00:00:33.549 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.888 [I] NetDataPublshr: ExternalRoute fc00::/7 - State: Adding -> Added
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.888 [I] NetworkData---: Sent ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.888 [I] NetworkData---: Received ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.888 [I] NetworkData---: Sent ServerData ack
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.888 [I] Notifier------: StateChanged (0x00000200) [NetData]
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.889 [I] Mle-----------: Send Data Response (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.889 [I] BbrLeader-----: PBBR state: None
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.889 [I] RoutingManager: Will evaluate routing policy in 00:03.326 (3326 msec)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.889 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:Added) in netdata - total:1, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.894 [I] Platform------: Execute command `ipset flush otbr-ingress-allow-dst-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.900 [I] Platform------: Execute command `ipset flush otbr-ingress-deny-src-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.905 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd5e:cf94:f94e:736f::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.910 [I] Platform------: Execute command `ipset swap otbr-ingress-deny-src-swap otbr-ingress-deny-src` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.915 [I] Platform------: Execute command `ipset swap otbr-ingress-allow-dst-swap otbr-ingress-allow-dst` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.915 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:85, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.915 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.929 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.929 [I] MeshForwarder-: Sent IPv6 UDP msg, len:106, chksum:976b, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.929 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.929 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.938 [I] RoutingManager: RsSender: Sent RS 1/3
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.938 [I] RoutingManager: Received RS from fe80:0:0:0:42:acff:fe16:2 on infra netif 928
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:33.938 [I] RoutingManager: Will evaluate routing policy in 00:00.175 (175 msec)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] RoutingManager: Setting local OMR prefix to generated prefix: fd3c:cde1:f14b:1::/64
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] RoutingManager: No favored OMR prefix found in Thread network.
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] RoutingManager: Added local OMR prefix fd3c:cde1:f14b:1::/64 (def-route:no) in Thread Network Data
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] NetDataPublshr: Publishing ExternalRoute fd3c:cde1:f14b:2:0:0::/96
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 - State: NoEntry -> ToAdd
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 (state:ToAdd) in netdata - total:0, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 - State: ToAdd -> Adding
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 (state:Adding) - update in 536 msec
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] Nat64---------: IPv6 Prefix for NAT64 updated to fd3c:cde1:f14b:2:0:0::/96
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] Nat64---------: NAT64 translator is now Active
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.113 [I] RoutingManager: Will evaluate routing policy in 00:16.419 (16419 msec)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] NetworkData---: Sent ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] Notifier------: StateChanged (0x40000000) [Nat64]
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] P-Netif-------: Sent request#10 to add route 192.168.255.0/24
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] P-Netif-------: Adding route for NAT64
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] NetworkData---: Received ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] NetworkData---: Sent ServerData ack
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] P-Netif-------: Succeeded to process request#10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] Notifier------: StateChanged (0x00000200) [NetData]
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] Mle-----------: Send Data Response (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.114 [I] BbrLeader-----: PBBR state: None
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.115 [I] Settings------: Read SlaacIidSecretKey
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.115 [I] Slaac---------: Adding fd3c:cde1:f14b:1:ab56:9f8f:cb91:35c8
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.115 [I] P-Netif-------: Sent request#11 to add fd3c:cde1:f14b:1:ab56:9f8f:cb91:35c8/64
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.115 [I] RoutingManager: Will evaluate routing policy in 00:02.782 (2782 msec)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.115 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:Added) in netdata - total:1, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.115 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 (state:Adding) in netdata - total:0, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.120 [I] Platform------: Execute command `ipset flush otbr-ingress-allow-dst-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.125 [I] Platform------: Execute command `ipset flush otbr-ingress-deny-src-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.130 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.135 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd5e:cf94:f94e:736f::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.142 [I] Platform------: Execute command `ipset add otbr-ingress-allow-dst-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.147 [I] Platform------: Execute command `ipset swap otbr-ingress-deny-src-swap otbr-ingress-deny-src` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.152 [I] Platform------: Execute command `ipset swap otbr-ingress-allow-dst-swap otbr-ingress-allow-dst` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing existing service OpenThread BorderRouter #B767._meshcop._udp: outdated
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Cancelled previous publishing meshcop service OpenThread BorderRouter #B767._meshcop._udp.local
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Cancelled previous publishing meshcop service OpenThread BorderRouter #B767._meshcop._udp.local
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Registering service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.152 [I] Notifier------: StateChanged (0x00000001) [Ip6+]
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [U] fd3c:cde1:f14b:1:ab56:9f8f:cb91:35c8
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:107, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.154 [I] P-Netif-------: Succeeded to process request#11
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.155 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.155 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.155 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.155 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.155 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.155 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.155 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.167 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.167 [I] MeshForwarder-: Sent IPv6 UDP msg, len:128, chksum:9150, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.167 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.167 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.339 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.339 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.339 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.349 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.349 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:295e, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.349 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.349 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] BbrLocal------: Add BBR Service: seqno (1), delay (5s), timeout (3600s), OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] NetworkData---: Sent ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] NetworkData---: Received ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] NetworkData---: Allocated Service ID = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] NetworkData---: Sent ServerData ack
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] Notifier------: StateChanged (0x00000200) [NetData]
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] Mle-----------: Send Data Response (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] BbrLeader-----: PBBR state: Added
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] BbrLeader-----: Rloc16:0x1000, seqno:1, delay:5, timeout:3600
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.360 [I] P-Netif-------: Sent request#12 to add fd5e:cf94:f94e:736f:0:ff:fe00:fc38/64
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.361 [I] P-Netif-------: Sent request#13 to add fd5e:cf94:f94e:736f:0:ff:fe00:fc10/64
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.361 [I] RoutingManager: Will evaluate routing policy in 00:02.906 (2906 msec)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.361 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:Added) in netdata - total:1, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.361 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 (state:Adding) in netdata - total:0, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.366 [I] Platform------: Execute command `ipset flush otbr-ingress-allow-dst-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.371 [I] Platform------: Execute command `ipset flush otbr-ingress-deny-src-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.376 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.381 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd5e:cf94:f94e:736f::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.386 [I] Platform------: Execute command `ipset add otbr-ingress-allow-dst-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.391 [I] Platform------: Execute command `ipset swap otbr-ingress-deny-src-swap otbr-ingress-deny-src` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.396 [I] Platform------: Execute command `ipset swap otbr-ingress-allow-dst-swap otbr-ingress-allow-dst` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing existing service OpenThread BorderRouter #B767._meshcop._udp: outdated
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Removing service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Cancelled previous publishing meshcop service OpenThread BorderRouter #B767._meshcop._udp.local
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Registering service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.397 [I] Notifier------: StateChanged (0x02000001) [Ip6+ BbrState]
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.397 [I] Bbr-----------: Start listening on port 61631
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.397 [I] Bbr-----------: Backbone TMF subscribes ff32:40:fd5e:cf94:f94e:736f:0:3: OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.397 [I] BbrManager----: Start Backbone TMF agent: OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.398 [I] P-McastRtMgr--: Enable: OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [DEBG]-BBA-----: BackboneAgent: HandleBackboneRouterState: state=2, mBackboneRouterState=1
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: [NOTE]-BBA-----: BackboneAgent: Backbone Router becomes Primary!
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.398 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.398 [I] P-Netif-------: ADD [U] fd5e:cf94:f94e:736f:0:ff:fe00:fc38
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.398 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.398 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:123, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: Succeeded to process request#12
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.399 [I] P-Netif-------: Succeeded to process request#13
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.400 [I] P-Netif-------: ADD [U] fd5e:cf94:f94e:736f:0:ff:fe00:fc10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.400 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.400 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.411 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.411 [I] MeshForwarder-: Sent IPv6 UDP msg, len:144, chksum:6971, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.411 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.411 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.645 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.646 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.646 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.646 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.646 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.646 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.646 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 - State: Adding -> Added
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] NetworkData---: Sent ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] NetworkData---: Received ServerData
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] NetworkData---: Sent ServerData ack
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] Notifier------: StateChanged (0x00000200) [NetData]
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] Mle-----------: Send Data Response (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] BbrLeader-----: PBBR state: Unchanged
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] BbrLeader-----: Rloc16:0x1000, seqno:1, delay:5, timeout:3600
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] RoutingManager: Will evaluate routing policy in 00:02.801 (2801 msec)
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:Added) in netdata - total:1, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.649 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 (state:Added) in netdata - total:1, preferred:0, desired:10
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.654 [I] Platform------: Execute command `ipset flush otbr-ingress-allow-dst-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.659 [I] Platform------: Execute command `ipset flush otbr-ingress-deny-src-swap` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.665 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.670 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd5e:cf94:f94e:736f::/64 -exist` = 0
+Oct  8 20:19:30 c05b7b3d1f41 otbr-agent[219]: 00:00:34.675 [I] Platform------: Execute command `ipset add otbr-ingress-allow-dst-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.680 [I] Platform------: Execute command `ipset swap otbr-ingress-deny-src-swap otbr-ingress-deny-src` = 0
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.685 [I] Platform------: Execute command `ipset swap otbr-ingress-allow-dst-swap otbr-ingress-allow-dst` = 0
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.685 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:121, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.685 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.697 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.697 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.697 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.706 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.706 [I] MeshForwarder-: Sent IPv6 UDP msg, len:165, chksum:e668, ecn:no, to:0xffff, sec:yes, prio:net
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.706 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:34.706 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: [INFO]-MDNS----: Successfully registered service OpenThread BorderRouter #B767._meshcop._udp
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Result of publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local: OK
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: message repeated 2 times: [ [INFO]-BA------: Result of publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local: OK]
+Oct  8 20:19:31 c05b7b3d1f41 otbr-agent[219]: 00:00:35.356 [I] MlrManager----: MLR Reregister!
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:35.725 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:35.726 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:35.726 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:35.735 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:35.735 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:f707, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:35.735 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:35.735 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:32 c05b7b3d1f41 otbr-agent[219]: 00:00:36.353 [W] DuaManager----: Failed to perform next registration: NotFound
+Oct  8 20:19:33 c05b7b3d1f41 otbr-agent[219]: 00:00:36.897 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:19:33 c05b7b3d1f41 otbr-agent[219]: 00:00:36.897 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:19:33 c05b7b3d1f41 otbr-agent[219]: 00:00:36.898 [I] RoutingManager: Will evaluate routing policy in 00:15.742 (15742 msec)
+Oct  8 20:19:34 c05b7b3d1f41 otbr-agent[219]: 00:00:37.939 [I] RoutingManager: RsSender: Sent RS 2/3
+Oct  8 20:19:34 c05b7b3d1f41 otbr-agent[219]: 00:00:37.939 [I] RoutingManager: Received RS from fe80:0:0:0:42:acff:fe16:2 on infra netif 928
+Oct  8 20:19:34 c05b7b3d1f41 otbr-agent[219]: 00:00:37.939 [I] RoutingManager: Will evaluate routing policy in 00:00.077 (77 msec)
+Oct  8 20:19:34 c05b7b3d1f41 otbr-agent[219]: 00:00:38.016 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:19:34 c05b7b3d1f41 otbr-agent[219]: 00:00:38.016 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:19:34 c05b7b3d1f41 otbr-agent[219]: 00:00:38.016 [I] RoutingManager: Will evaluate routing policy in 00:16.052 (16052 msec)
+Oct  8 20:19:36 c05b7b3d1f41 otbr-agent[219]: 00:00:40.493 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:36 c05b7b3d1f41 otbr-agent[219]: 00:00:40.494 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:36 c05b7b3d1f41 otbr-agent[219]: 00:00:40.494 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:36 c05b7b3d1f41 otbr-agent[219]: 00:00:40.503 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:36 c05b7b3d1f41 otbr-agent[219]: 00:00:40.503 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:b941, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:36 c05b7b3d1f41 otbr-agent[219]: 00:00:40.504 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:36 c05b7b3d1f41 otbr-agent[219]: 00:00:40.504 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:38 c05b7b3d1f41 otbr-agent[219]: 00:00:41.939 [I] RoutingManager: RsSender: Sent RS 3/3
+Oct  8 20:19:38 c05b7b3d1f41 otbr-agent[219]: 00:00:41.940 [I] RoutingManager: Received RS from fe80:0:0:0:42:acff:fe16:2 on infra netif 928
+Oct  8 20:19:38 c05b7b3d1f41 otbr-agent[219]: 00:00:41.940 [I] RoutingManager: Will evaluate routing policy in 00:00.435 (435 msec)
+Oct  8 20:19:38 c05b7b3d1f41 otbr-agent[219]: 00:00:42.375 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:19:38 c05b7b3d1f41 otbr-agent[219]: 00:00:42.375 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:19:38 c05b7b3d1f41 otbr-agent[219]: 00:00:42.375 [I] RoutingManager: Will evaluate routing policy in 00:15.806 (15806 msec)
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.940 [I] RoutingManager: RsSender: Finished sending RS msgs and waiting for RAs
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.940 [I] RoutingManager: Will evaluate routing policy immediately
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.940 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: Local on-link prefix state: Deprecating -> Publishing (fde7:6e9a:61f6:7583::/64)
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: Local on-link prefix state: Publishing -> Advertising (fde7:6e9a:61f6:7583::/64)
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: Preparing RA
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: - RA Header - flags - M:0 O:0 S:1
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: - RA Header - default route - lifetime:0
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: - PIO fde7:6e9a:61f6:7583::/64 (valid:1800, preferred:1800)
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: - RIO fd3c:cde1:f14b:1::/64 (lifetime:1800, prf:medium)
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.941 [I] RoutingManager: Sent RA on infra netif 928
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.942 [I] SrpServer-----: Selected port 53536
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.942 [I] NetDataPublshr: Publishing DNS/SRP service unicast (ml-eid, port:53536)
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.942 [I] NetDataPublshr: DNS/SRP service - State: NoEntry -> ToAdd
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.942 [I] NetDataPublshr: DNS/SRP service (state:ToAdd) in netdata - total:0, preferred:0, desired:2
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.942 [I] NetDataPublshr: DNS/SRP service - State: ToAdd -> Adding
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.942 [I] NetDataPublshr: DNS/SRP service (state:Adding) - update in 2513 msec
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.942 [I] RoutingManager: Will evaluate routing policy in 00:14.378 (14378 msec)
+Oct  8 20:19:39 c05b7b3d1f41 otbr-agent[219]: 00:00:42.943 [I] RoutingManager: Received RA from fe80:0:0:0:42:acff:fe16:2 on infra netif 928 (this BR routing-manager)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:44.745 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:44.745 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:44.745 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:44.755 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:44.756 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:d1ea, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:44.756 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:44.756 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.455 [I] NetDataPublshr: DNS/SRP service - State: Adding -> Added
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.455 [I] SrpServer-----: Start listening on port 53536
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.455 [I] NetworkData---: Sent ServerData
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.455 [I] NetworkData---: Received ServerData
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.455 [I] NetworkData---: Allocated Service ID = 1
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.456 [I] NetworkData---: Sent ServerData ack
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.456 [I] Notifier------: StateChanged (0x00000200) [NetData]
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.456 [I] Mle-----------: Send Data Response (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.456 [I] BbrLeader-----: PBBR state: Unchanged
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.456 [I] BbrLeader-----: Rloc16:0x1000, seqno:1, delay:5, timeout:3600
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.456 [I] P-Netif-------: Sent request#14 to add fd5e:cf94:f94e:736f:0:ff:fe00:fc11/64
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.456 [I] RoutingManager: Will evaluate routing policy in 00:02.739 (2739 msec)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.457 [I] SrpClient-----: AutoStartState 1stTimeSelect -> Unicast
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.457 [I] SrpClient-----: Requesting max tx jitter 10000 (OnServerStart)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.457 [I] SrpClient-----: Auto-starting, server [fd5e:cf94:f94e:736f:446f:36bf:b1ac:3d4b]:53536
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.457 [I] SrpClient-----: State Stopped -> Updated
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.457 [I] NetDataPublshr: DNS/SRP service (state:Added) in netdata - total:1, preferred:0, desired:2
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.457 [I] NetDataPublshr: ExternalRoute fc00::/7 (state:Added) in netdata - total:1, preferred:0, desired:10
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.457 [I] NetDataPublshr: ExternalRoute fd3c:cde1:f14b:2:0:0::/96 (state:Added) in netdata - total:1, preferred:0, desired:10
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.462 [I] Platform------: Execute command `ipset flush otbr-ingress-allow-dst-swap` = 0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.467 [I] Platform------: Execute command `ipset flush otbr-ingress-deny-src-swap` = 0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.472 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.477 [I] Platform------: Execute command `ipset add otbr-ingress-deny-src-swap fd5e:cf94:f94e:736f::/64 -exist` = 0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.482 [I] Platform------: Execute command `ipset add otbr-ingress-allow-dst-swap fd3c:cde1:f14b:1::/64 -exist` = 0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.487 [I] Platform------: Execute command `ipset swap otbr-ingress-deny-src-swap otbr-ingress-deny-src` = 0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.492 [I] Platform------: Execute command `ipset swap otbr-ingress-allow-dst-swap otbr-ingress-allow-dst` = 0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local.
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: [INFO]-BA------: Result of publish meshcop service OpenThread BorderRouter #B767._meshcop._udp.local: OK
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.493 [I] Notifier------: StateChanged (0x00000001) [Ip6+]
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.493 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.493 [I] P-Netif-------: ADD [U] fd5e:cf94:f94e:736f:0:ff:fe00:fc11
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.493 [D] P-Netif-------: Unexpected address type (6).
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.493 [D] P-Netif-------: Unexpected address type (8).
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.494 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.494 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.494 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.494 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.494 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.494 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.494 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:121, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: Succeeded to process request#14
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.495 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.508 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:2, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.508 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:96, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.509 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.520 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:3, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.521 [I] MeshForwarder-: Sent IPv6 UDP msg, len:192, chksum:ec67, ecn:no, to:0xffff, sec:yes, prio:net
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.521 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:41 c05b7b3d1f41 otbr-agent[219]: 00:00:45.521 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.165 [I] P-Netif-------: Message dropped by Thread
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.166 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.166 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.166 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.167 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.167 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.167 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.167 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.168 [I] P-Netif-------: ADD [M] ff03::2 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.168 [I] P-Netif-------: ADD [M] ff33:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.168 [I] P-Netif-------: ADD [M] ff32:40:fd5e:cf94:f94e:736f:0:1 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.169 [I] P-Netif-------: ADD [M] ff03::fc (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.169 [I] P-Netif-------: ADD [M] ff03::1 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.169 [I] P-Netif-------: ADD [M] ff02::16 (already subscribed, ignored)
+Oct  8 20:19:42 c05b7b3d1f41 otbr-agent[219]: 00:00:46.169 [I] P-Netif-------: ADD [M] ff02::2 (already subscribed, ignored)
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.195 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.195 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.195 [I] RoutingManager: Preparing RA
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.196 [I] RoutingManager: - RA Header - flags - M:0 O:0 S:1
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.196 [I] RoutingManager: - RA Header - default route - lifetime:0
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.196 [I] RoutingManager: - PIO fde7:6e9a:61f6:7583::/64 (valid:1800, preferred:1800)
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.196 [I] RoutingManager: - RIO fd3c:cde1:f14b:1::/64 (lifetime:1800, prf:medium)
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.197 [I] RoutingManager: Sent RA on infra netif 928
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.197 [I] RoutingManager: Will evaluate routing policy in 00:16.592 (16592 msec)
+Oct  8 20:19:44 c05b7b3d1f41 otbr-agent[219]: 00:00:48.199 [I] RoutingManager: Received RA from fe80:0:0:0:42:acff:fe16:2 on infra netif 928 (this BR routing-manager)
+Oct  8 20:19:50 c05b7b3d1f41 otbr-agent[219]: 00:00:54.594 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:19:50 c05b7b3d1f41 otbr-agent[219]: 00:00:54.595 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:19:50 c05b7b3d1f41 otbr-agent[219]: 00:00:54.595 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:19:50 c05b7b3d1f41 otbr-agent[219]: 00:00:54.605 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:4, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:19:50 c05b7b3d1f41 otbr-agent[219]: 00:00:54.605 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:6e87, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:19:50 c05b7b3d1f41 otbr-agent[219]: 00:00:54.605 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:19:50 c05b7b3d1f41 otbr-agent[219]: 00:00:54.605 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:19:56 c05b7b3d1f41 otbr-agent[219]: 00:01:00.091 [D] P-RadioSpinel-: Trying to get RCP time offset
+Oct  8 20:19:56 c05b7b3d1f41 otbr-agent[219]: 00:01:00.091 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_GET, key:TIMESTAMP
+Oct  8 20:19:56 c05b7b3d1f41 otbr-agent[219]: 00:01:00.092 [D] P-RadioSpinel-: Wait response: tid=5 key=2050
+Oct  8 20:19:56 c05b7b3d1f41 otbr-agent[219]: 00:01:00.094 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:5, cmd:PROP_VALUE_IS, key:TIMESTAMP, timestamp:1802154432
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.789 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.789 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.789 [I] RoutingManager: Preparing RA
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.790 [I] RoutingManager: - RA Header - flags - M:0 O:0 S:1
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.790 [I] RoutingManager: - RA Header - default route - lifetime:0
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.790 [I] RoutingManager: - PIO fde7:6e9a:61f6:7583::/64 (valid:1800, preferred:1800)
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.790 [I] RoutingManager: - RIO fd3c:cde1:f14b:1::/64 (lifetime:1800, prf:medium)
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.790 [I] RoutingManager: Sent RA on infra netif 928
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.790 [I] RoutingManager: Will evaluate routing policy in 00:16.777 (16777 msec)
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.791 [I] RoutingManager: Received RA from fe80:0:0:0:42:acff:fe16:2 on infra netif 928 (this BR routing-manager)
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.888 [I] RoutingManager: Received RS from fe80:0:0:0:58d9:61ff:fe53:cb55 on infra netif 928
+Oct  8 20:20:01 c05b7b3d1f41 otbr-agent[219]: 00:01:04.888 [I] RoutingManager: Will evaluate routing policy in 00:02.902 (2902 msec)
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.790 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.791 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.791 [I] RoutingManager: Preparing RA
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.791 [I] RoutingManager: - RA Header - flags - M:0 O:0 S:1
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.792 [I] RoutingManager: - RA Header - default route - lifetime:0
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.792 [I] RoutingManager: - PIO fde7:6e9a:61f6:7583::/64 (valid:1800, preferred:1800)
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.792 [I] RoutingManager: - RIO fd3c:cde1:f14b:1::/64 (lifetime:1800, prf:medium)
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.793 [I] RoutingManager: Sent RA on infra netif 928
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.794 [I] RoutingManager: Will evaluate routing policy in 02:45.057 (165057 msec)
+Oct  8 20:20:04 c05b7b3d1f41 otbr-agent[219]: 00:01:07.796 [I] RoutingManager: Received RA from fe80:0:0:0:42:acff:fe16:2 on infra netif 928 (this BR routing-manager)
+Oct  8 20:20:05 c05b7b3d1f41 otbr-agent[219]: 00:01:09.575 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:20:05 c05b7b3d1f41 otbr-agent[219]: 00:01:09.576 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:20:05 c05b7b3d1f41 otbr-agent[219]: 00:01:09.577 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:20:05 c05b7b3d1f41 otbr-agent[219]: 00:01:09.585 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:6, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:20:05 c05b7b3d1f41 otbr-agent[219]: 00:01:09.585 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:a440, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:20:05 c05b7b3d1f41 otbr-agent[219]: 00:01:09.585 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:20:05 c05b7b3d1f41 otbr-agent[219]: 00:01:09.585 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:20:11 c05b7b3d1f41 kernel: [36171.382194] [UFW BLOCK] IN=eth0 OUT= MAC= SRC=fe80:0000:0000:0000:f277:8b08:dedc:f8e6 DST=ff02:0000:0000:0000:0000:0000:0000:000c LEN=391 TC=0 HOPLIMIT=2 FLOWLBL=777456 PROTO=UDP SPT=36358 DPT=1900 LEN=351
+Oct  8 20:20:17 c05b7b3d1f41 otbr-agent[219]: 00:01:20.682 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:20:17 c05b7b3d1f41 otbr-agent[219]: 00:01:20.683 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:20:17 c05b7b3d1f41 otbr-agent[219]: 00:01:20.683 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:20:17 c05b7b3d1f41 otbr-agent[219]: 00:01:20.692 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:7, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:20:17 c05b7b3d1f41 otbr-agent[219]: 00:01:20.692 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:933b, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:20:17 c05b7b3d1f41 otbr-agent[219]: 00:01:20.692 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:20:17 c05b7b3d1f41 otbr-agent[219]: 00:01:20.692 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:20:31 c05b7b3d1f41 otbr-agent[219]: 00:01:35.405 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:20:31 c05b7b3d1f41 otbr-agent[219]: 00:01:35.405 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:20:31 c05b7b3d1f41 otbr-agent[219]: 00:01:35.405 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:20:31 c05b7b3d1f41 otbr-agent[219]: 00:01:35.414 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:8, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:20:31 c05b7b3d1f41 otbr-agent[219]: 00:01:35.414 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:1ea8, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:20:31 c05b7b3d1f41 otbr-agent[219]: 00:01:35.414 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:20:31 c05b7b3d1f41 otbr-agent[219]: 00:01:35.414 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:20:42 c05b7b3d1f41 otbr-agent[219]: 00:01:45.782 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:20:42 c05b7b3d1f41 otbr-agent[219]: 00:01:45.783 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:20:42 c05b7b3d1f41 otbr-agent[219]: 00:01:45.784 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:20:42 c05b7b3d1f41 otbr-agent[219]: 00:01:45.792 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:9, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:20:42 c05b7b3d1f41 otbr-agent[219]: 00:01:45.793 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:134f, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:20:42 c05b7b3d1f41 otbr-agent[219]: 00:01:45.793 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:20:42 c05b7b3d1f41 otbr-agent[219]: 00:01:45.793 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:20:52 c05b7b3d1f41 otbr-agent[219]: 00:01:56.621 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:20:52 c05b7b3d1f41 otbr-agent[219]: 00:01:56.622 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:20:52 c05b7b3d1f41 otbr-agent[219]: 00:01:56.623 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:20:52 c05b7b3d1f41 otbr-agent[219]: 00:01:56.632 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:10, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:20:52 c05b7b3d1f41 otbr-agent[219]: 00:01:56.632 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:ff83, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:20:52 c05b7b3d1f41 otbr-agent[219]: 00:01:56.633 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:20:52 c05b7b3d1f41 otbr-agent[219]: 00:01:56.633 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:20:56 c05b7b3d1f41 otbr-agent[219]: 00:02:00.095 [D] P-RadioSpinel-: Trying to get RCP time offset
+Oct  8 20:20:56 c05b7b3d1f41 otbr-agent[219]: 00:02:00.095 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_GET, key:TIMESTAMP
+Oct  8 20:20:56 c05b7b3d1f41 otbr-agent[219]: 00:02:00.096 [D] P-RadioSpinel-: Wait response: tid=11 key=2050
+Oct  8 20:20:56 c05b7b3d1f41 otbr-agent[219]: 00:02:00.099 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:11, cmd:PROP_VALUE_IS, key:TIMESTAMP, timestamp:1862157258
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.303 [I] P-Daemon------: Session socket is ready
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.303 [D] Cli-----------: Input: state
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.304 [D] Cli-----------: Output: leader
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.304 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.305 [D] Cli-----------: Input: version
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.305 [D] Cli-----------: Output: OPENTHREAD/a9805ed; POSIX; Sep 30 2024 06:25:42
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.305 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.306 [D] Cli-----------: Input: version api
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.306 [D] Cli-----------: Output: 450
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.306 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.307 [D] Cli-----------: Input: rcp version
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.307 [D] Cli-----------: Output: SL-OPENTHREAD/2.4.0.0_GitHub-7074a43e4; EFR32; Aug 20 2024 16:30:57
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.308 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.308 [D] Cli-----------: Input: eui64
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.309 [D] Cli-----------: Output: bc026efffea9ce5d
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.309 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.309 [D] Cli-----------: Input: channel
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.310 [D] Cli-----------: Output: 15
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.310 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.311 [D] Cli-----------: Input: txpower
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.311 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_GET, key:PHY_TX_POWER
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.311 [D] P-RadioSpinel-: Wait response: tid=12 key=37
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.314 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:12, cmd:PROP_VALUE_IS, key:PHY_TX_POWER, power:5
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.314 [D] Cli-----------: Output: 5 dBm
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.314 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.315 [D] Cli-----------: Input: networkname
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.316 [D] Cli-----------: Output: ha-thread-7e5b
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.316 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.317 [D] Cli-----------: Input: extpanid
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.317 [D] Cli-----------: Output: e76e9a61f6547583
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.318 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.318 [D] Cli-----------: Input: panid
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.318 [D] Cli-----------: Output: 0x7e5b
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.319 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.320 [D] Cli-----------: Input: partitionid
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.320 [D] Cli-----------: Output: 793676667
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.320 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.321 [D] Cli-----------: Input: dataset active
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.321 [D] Cli-----------: Output: Active Timestamp: 1
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.321 [D] Cli-----------: Output: Channel: 15
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.322 [D] Cli-----------: Output: Wake-up Channel: 24
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.322 [D] Cli-----------: Output: Channel Mask: 0x07fff800
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.322 [D] Cli-----------: Output: Ext PAN ID: e76e9a61f6547583
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.323 [D] Cli-----------: Output: Mesh Local Prefix: fd5e:cf94:f94e:736f::/64
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.323 [D] Cli-----------: Output: Network Key: 473aeeb0b1cf9c2daed40fc127c4d00d
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.324 [D] Cli-----------: Output: Network Name: ha-thread-7e5b
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.324 [D] Cli-----------: Output: PAN ID: 0x7e5b
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.324 [D] Cli-----------: Output: PSKc: c4aae7ca21ce0e3f33b6594edf6f192c
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.325 [D] Cli-----------: Output: Security Policy: 672 onrc 0
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.325 [D] Cli-----------: Output: Done
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.326 [D] Cli-----------: Input: ipaddr
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.326 [D] Cli-----------: Output: fd5e:cf94:f94e:736f:0:ff:fe00:fc11
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.326 [D] Cli-----------: Output: fd5e:cf94:f94e:736f:0:ff:fe00:fc10
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.327 [D] Cli-----------: Output: fd5e:cf94:f94e:736f:0:ff:fe00:fc38
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.327 [D] Cli-----------: Output: fd3c:cde1:f14b:1:ab56:9f8f:cb91:35c8
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.327 [D] Cli-----------: Output: fd5e:cf94:f94e:736f:0:ff:fe00:fc00
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.327 [D] Cli-----------: Output: fd5e:cf94:f94e:736f:0:ff:fe00:1000
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.328 [D] Cli-----------: Output: fd5e:cf94:f94e:736f:446f:36bf:b1ac:3d4b
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.328 [D] Cli-----------: Output: fe80:0:0:0:301e:babc:6f1:b767
+Oct  8 20:21:03 c05b7b3d1f41 otbr-agent[219]: 00:02:07.328 [D] Cli-----------: Output: Done
+Oct  8 20:21:05 c05b7b3d1f41 otbr-agent[219]: 00:02:09.614 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:21:05 c05b7b3d1f41 otbr-agent[219]: 00:02:09.615 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:21:05 c05b7b3d1f41 otbr-agent[219]: 00:02:09.615 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:21:05 c05b7b3d1f41 otbr-agent[219]: 00:02:09.626 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:13, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:21:05 c05b7b3d1f41 otbr-agent[219]: 00:02:09.626 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:1d3c, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:21:05 c05b7b3d1f41 otbr-agent[219]: 00:02:09.626 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:21:05 c05b7b3d1f41 otbr-agent[219]: 00:02:09.626 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.517 [I] RoutingManager: Received RS from fe80:0:0:0:58d9:61ff:fe53:cb55 on infra netif 928
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.518 [I] RoutingManager: Will evaluate routing policy in 00:00.106 (106 msec)
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.624 [I] RoutingManager: Evaluating routing policy
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.624 [I] RoutingManager: Evaluating NAT64 prefix
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.624 [I] RoutingManager: Preparing RA
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.624 [I] RoutingManager: - RA Header - flags - M:0 O:0 S:1
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.624 [I] RoutingManager: - RA Header - default route - lifetime:0
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.624 [I] RoutingManager: - PIO fde7:6e9a:61f6:7583::/64 (valid:1800, preferred:1800)
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.624 [I] RoutingManager: - RIO fd3c:cde1:f14b:1::/64 (lifetime:1800, prf:medium)
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.625 [I] RoutingManager: Sent RA on infra netif 928
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.625 [I] RoutingManager: Will evaluate routing policy in 02:55.375 (175375 msec)
+Oct  8 20:21:10 c05b7b3d1f41 otbr-agent[219]: 00:02:14.625 [I] RoutingManager: Received RA from fe80:0:0:0:42:acff:fe16:2 on infra netif 928 (this BR routing-manager)
+Oct  8 20:21:19 c05b7b3d1f41 otbr-agent[219]: 00:02:23.487 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:21:19 c05b7b3d1f41 otbr-agent[219]: 00:02:23.488 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:21:19 c05b7b3d1f41 otbr-agent[219]: 00:02:23.488 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:21:19 c05b7b3d1f41 otbr-agent[219]: 00:02:23.498 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:14, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:21:19 c05b7b3d1f41 otbr-agent[219]: 00:02:23.498 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:bb17, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:21:19 c05b7b3d1f41 otbr-agent[219]: 00:02:23.499 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:21:19 c05b7b3d1f41 otbr-agent[219]: 00:02:23.499 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:21:28 c05b7b3d1f41 otbr-agent[219]: 00:02:31.804 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:21:28 c05b7b3d1f41 otbr-agent[219]: 00:02:31.805 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:21:28 c05b7b3d1f41 otbr-agent[219]: 00:02:31.806 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:21:28 c05b7b3d1f41 otbr-agent[219]: 00:02:31.814 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:15, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:21:28 c05b7b3d1f41 otbr-agent[219]: 00:02:31.815 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:e134, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:21:28 c05b7b3d1f41 otbr-agent[219]: 00:02:31.815 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:21:28 c05b7b3d1f41 otbr-agent[219]: 00:02:31.815 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
+Oct  8 20:21:40 c05b7b3d1f41 otbr-agent[219]: 00:02:43.833 [I] Mle-----------: Send Advertisement (ff02:0:0:0:0:0:0:1)
+Oct  8 20:21:40 c05b7b3d1f41 otbr-agent[219]: 00:02:43.834 [D] P-SpinelDrive-: Sent spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_SET, key:STREAM_RAW, len:69, channel:15, maxbackoffs:4, maxretries:15 ...
+Oct  8 20:21:40 c05b7b3d1f41 otbr-agent[219]: 00:02:43.834 [D] P-SpinelDrive-: ... csmaCaEnabled:1, isHeaderUpdated:0, isARetx:0, skipAes:0, txDelay:0, txDelayBase:0
+Oct  8 20:21:40 c05b7b3d1f41 otbr-agent[219]: 00:02:43.842 [D] P-SpinelDrive-: Received spinel frame, flg:0x2, iid:0, tid:1, cmd:PROP_VALUE_IS, key:LAST_STATUS, status:OK
+Oct  8 20:21:40 c05b7b3d1f41 otbr-agent[219]: 00:02:43.843 [I] MeshForwarder-: Sent IPv6 UDP msg, len:90, chksum:f5f0, ecn:no, to:0xffff, sec:no, prio:net
+Oct  8 20:21:40 c05b7b3d1f41 otbr-agent[219]: 00:02:43.843 [I] MeshForwarder-:     src:[fe80:0:0:0:301e:babc:6f1:b767]:19788
+Oct  8 20:21:40 c05b7b3d1f41 otbr-agent[219]: 00:02:43.843 [I] MeshForwarder-:     dst:[ff02:0:0:0:0:0:0:1]:19788
