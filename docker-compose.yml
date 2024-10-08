@@ -1,0 +1,28 @@
+services:
+  otbr:
+    container_name: otbr
+    image: openthread/otbr
+    ports:
+      - 8085:80
+      - 8086:8081
+    restart: unless-stopped
+    logging:
+      driver: local
+    stdin_open: true
+    tty: true
+    dns: 127.0.0.1
+    volumes:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+      - /home/pi/otbr_config:/var/lib/thread
+    privileged: true
+    devices:
+      - /dev/ttyUSB0
+    command: >
+      --radio-url "spinel+hdlc+uart:///dev/ttyUSB0?uart-baudrate=460800&uart-flow-control"
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+      net.ipv4.conf.all.forwarding: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.ipv4.ip_forward: 1
+      net.ipv6.conf.all.accept_ra_rt_info_max_plen: 64
+      net.ipv6.conf.all.accept_ra: 2
